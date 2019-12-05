@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
 import Alert from './layout/notify';
-
-class Signup extends Component {
-
+class Login extends Component {
     state = {
-        email: '',
-        password: '',
-        username: '',
+        task: null,
         message: {},
+        canShowMessage:null,
     }
     onChange = (e) => {
         this.setState({
@@ -16,20 +13,23 @@ class Signup extends Component {
     }
     onSubmit = async (e) => {
         e.preventDefault()
-        const { email, password, username } = this.state
-        console.log({ email, password });
+        const { task } = this.state;
+        const { id } = this.props.match.params;
+        let token = localStorage.getItem('token')
         try {
-            let res = await fetch('http://localhost:5000/api/user', {
+            let res = await fetch(`http://localhost:5000/api/user/${id}/task`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ username, email, password })
+                body: JSON.stringify({ name: task })
             });
             let json = await res.json();
             if (json.success) {
-                this.props.history.push("/login")
+
+                this.props.history.push(`/user/${id}`)
             } else {
                 let err = new Error(`${json.message}`);
                 throw err
@@ -43,8 +43,9 @@ class Signup extends Component {
             })
         }
     }
+
     render() {
-        let { message, canShowMessage } = this.state
+        let {canShowMessage,message} = this.state;
         return (
             <div className="container w-50">
                 <div className='row mt-4'>
@@ -56,36 +57,19 @@ class Signup extends Component {
                                 ) : null}
                                 <h1 className='text-center pb-4 pt-4'>
                                     <span className='text-primary'>
-                                        <i className='fas fa-lock'></i>
-                                        Sign up
+                                        Add New Task
                                     </span>
                                 </h1>
                                 <form onSubmit={this.onSubmit}>
                                     <div className='from-group'>
-                                        <label htmlFor='email'>Username</label>
+                                        <label htmlFor='task'>New Task</label>
                                         <input type='text'
                                             className='form-control'
-                                            name='username' value={this.state.username}
+                                            name='task' value={this.state.task}
                                             onChange={this.onChange}
                                             required />
                                     </div>
-                                    <div className='from-group'>
-                                        <label htmlFor='email'>Email</label>
-                                        <input type='email'
-                                            className='form-control'
-                                            name='email' value={this.state.email}
-                                            onChange={this.onChange}
-                                            required />
-                                    </div>
-                                    <div className='from-group'>
-                                        <label htmlFor='password'>Password</label>
-                                        <input type='password'
-                                            className='form-control'
-                                            name='password' value={this.state.password}
-                                            onChange={this.onChange}
-                                            required />
-                                    </div>
-                                    <input type="submit" value="Login" className='btn btn-primary btn-block mt-4' />
+                                    <input type="submit" value="Submit" className='btn btn-primary btn-block mt-4' />
                                 </form>
                             </div>
                         </div>
@@ -96,4 +80,4 @@ class Signup extends Component {
     }
 }
 
-export default Signup
+export default Login
